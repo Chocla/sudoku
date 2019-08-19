@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <ctime> 
 //implement for 9x9, then 16x16
 
 const int N = 9;
@@ -59,8 +59,9 @@ void solveBoard(int board[N][N]) {
         //check each number 1-9,starting at current value+1
         for(int i = board[row][col] + 1;i <= N ; i++) { //[1,N]
             //if we find one that is valid, continue to the next cell
-            if(isValid(i, currentCell,board)) {
-                board[row][col] = i;
+            int candidate = rand() % N + 1;
+            if(isValid(candidate, currentCell,board)) {
+                board[row][col] = candidate;
                 backtrack = false;
                 break;
             }
@@ -81,11 +82,24 @@ void solveBoard(int board[N][N]) {
     return;
 }
 
-void formatBoard() {
+//TODO: Implement this
+void removeCells() {
+    //pick a random cell number
+    //remove that cell
+    //check if the solver can solve without using the cells old value
+        //if it can, then removing the value leads to a nonunique solution
 
+}
+void formatBoard() {
+    //TODO: Somehow put the board into a .tex file
 }
 
 int main() {
+    std::srand(unsigned(std::time(0)));
+    int blank[N][N];
+    for(int i = 0; i < N; i++)
+        for(int j = 0; j < N; j++)
+            blank[i][j] = 0;
     int board[N][N] = {
         {5,3,0, 0,7,0, 0,0,0},
         {6,0,0, 1,9,5, 0,0,0},
@@ -112,7 +126,7 @@ int main() {
         {2,8,7, 4,1,9, 6,3,5},
         {3,4,5, 2,8,6, 1,7,9}
     };
-    solveBoard(board);
-    printBoard(board);
-    printBoard(solved);
+    solveBoard(blank);
+    printBoard(blank);
+
 }
