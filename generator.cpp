@@ -14,6 +14,7 @@ void printBoard(int board[N][N]) {
     }
     std::cout << "\n";
 }
+//checks if candidate value is unique to col,row, and box
 bool isValid(int candidate,int cell, int board[N][N]) {
     int row = cell / N;
     int col = cell % N;
@@ -36,7 +37,7 @@ bool isValid(int candidate,int cell, int board[N][N]) {
     }
     return true;
 }
-void solveBoard(int board[N][N]) {
+bool solveBoard(int board[N][N], int excludeCell = N*N, int exlcludeVal = -1) {
     bool flags[N*N]; //keep track of initial board values
     for(int i = 0; i < N; i++) {
         for(int j = 0; j < N; j++) {
@@ -59,8 +60,9 @@ void solveBoard(int board[N][N]) {
         //check each number 1-9,starting at current value+1
         for(int i = board[row][col] + 1;i <= N ; i++) { //[1,N]
             //if we find one that is valid, continue to the next cell
-            int candidate = rand() % N + 1;
-            if(isValid(candidate, currentCell,board)) {
+            int candidate = std::rand() % N + 1;
+            if(isValid(candidate, currentCell,board) && 
+                !(currentCell == excludeCell && candidate == exlcludeVal)) {
                 board[row][col] = candidate;
                 backtrack = false;
                 break;
@@ -77,18 +79,34 @@ void solveBoard(int board[N][N]) {
             continue;
         }
         currentCell++;
+        if(currentCell < 0) {
+            return false;
+        }
     }
     //board solved
-    return;
+    return true;
 }
 
-//TODO: Implement this
-void removeCells() {
-    //pick a random cell number
-    //remove that cell
-    //check if the solver can solve without using the cells old value
-        //if it can, then removing the value leads to a nonunique solution
-
+//TODO: fix non unique solutions problem
+void removeCells(int board[N][N],int numCells) {
+    int count = 0;
+    while(count < numCells) {
+        //pick a rnadom cell to remove
+        int candidateCell = std::rand() % (N*N);
+        int row = candidateCell / N;
+        int col = candidateCell % N;
+        int tmp = board[row][col];
+        if(tmp == 0) {
+            continue;
+        }
+        board[row][col] = 0;
+        //if board can be solved using a value other than the removed one, solution is no longer unique
+        if( !solveBoard(board, candidateCell,tmp)) {
+            count++;
+        } else {
+            board[row][col] = tmp;
+        }
+    }
 }
 void formatBoard() {
     //TODO: Somehow put the board into a .tex file
@@ -126,7 +144,11 @@ int main() {
         {2,8,7, 4,1,9, 6,3,5},
         {3,4,5, 2,8,6, 1,7,9}
     };
+
     solveBoard(blank);
     printBoard(blank);
-
+    removeCells(blank,40);
+    printBoard(blank);
+    // std::cout << solveBoard(board, 2,4);
+    // printBoard(board);
 }
