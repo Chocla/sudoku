@@ -1,0 +1,28 @@
+\documentclass{article}
+\usepackage{logicpuzzle}
+\newenvironment{monsterdoku}[1][]{
+\begin{logicpuzzle}[rows=16,columns=16,#1]
+\begin{puzzleforeground}
+\framepuzzle
+\framearea{black}{(5,1)--(5,17)}
+\framearea{black}{(9,1)--(9,17)}
+\framearea{black}{(13,1)--(13,17)}
+\framearea{black}{(1,5)--(17,5)}
+\framearea{black}{(1,9)--(17,9)}
+\framearea{black}{(1,13)--(17,13)}
+\end{puzzleforeground}
+    
+
+}{\end{logicpuzzle}}
+\begin{document}
+    \begin{center}
+        \begin{monsterdoku}[width=10cm,scale=0.50,fontsize=normalsize]
+    
+        \end{monsterdoku}
+
+        \vspace{1cm}
+        \begin{monsterdoku}[width=10cm,scale=0.50,fontsize=normalsize]
+    
+        \end{monsterdoku}
+    \end{center}
+\end{document}
