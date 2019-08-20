@@ -1,11 +1,13 @@
 #include <iostream>
 #include <ctime> 
+#include <cstdlib>
 //implement for 9x9, then 16x16
 
 const int N = 9;
 const int NR = 3; //Square root of N
 //for debugging
 void printBoard(int board[N][N]) {
+    std::cout << std::endl;
     for(int i = 0; i < N; i++) {
         for(int j = 0; j < N; j++) {
             std::cout << board[i][j] << " ";
@@ -48,6 +50,7 @@ bool solveBoard(int board[N][N], int excludeCell = N*N, int exlcludeVal = -1) {
             }
         }
     }
+    // std::cout << "Flags Made" << std::endl;
     int currentCell = 0;
     while(currentCell < N*N) {
         if(flags[currentCell]) {
@@ -70,19 +73,21 @@ bool solveBoard(int board[N][N], int excludeCell = N*N, int exlcludeVal = -1) {
         } 
         //zero out cell
         //decrement currentCell until flags[currentCell] is false
+        // std::cout << "Current Cell:" << currentCell << std::endl;
         if(backtrack) {
             board[row][col] = 0;
             currentCell--;
             while(flags[currentCell]) {
                 currentCell--;
             }
+            if(currentCell < 0) {
+                return false;
+            }
             continue;
         }
         currentCell++;
-        if(currentCell < 0) {
-            return false;
-        }
     }
+    // std::cout << "Board Solved" << std::endl;
     //board solved
     return true;
 }
@@ -91,11 +96,15 @@ bool solveBoard(int board[N][N], int excludeCell = N*N, int exlcludeVal = -1) {
 void removeCells(int board[N][N],int numCells) {
     int count = 0;
     while(count < numCells) {
-        //pick a rnadom cell to remove
+        if(count % 5 == 0) {
+            std::cout << "Removed " << count << " Cells" << std::endl;
+        }
+        //pick a random cell to remove
         int candidateCell = std::rand() % (N*N);
         int row = candidateCell / N;
         int col = candidateCell % N;
         int tmp = board[row][col];
+        // std::cout << "Cell: " << candidateCell << std::endl;
         if(tmp == 0) {
             continue;
         }
@@ -110,6 +119,18 @@ void removeCells(int board[N][N],int numCells) {
 }
 void formatBoard() {
     //TODO: Somehow put the board into a .tex file
+}
+
+int countZeros(int board[N][N]) {
+    int count = 0;
+    for(int i = 0; i < N; i++) {
+        for(int j = 0; j < N;j++) {
+            if(board[i][j] == 0 ){
+                count++;
+            }
+        }
+    }
+    return count;
 }
 
 int main() {
@@ -147,8 +168,10 @@ int main() {
 
     solveBoard(blank);
     printBoard(blank);
-    removeCells(blank,40);
+    removeCells(blank,60);
     printBoard(blank);
+    int count = countZeros(blank);
+    std::cout << "Actual Zeros: " << count << std::endl; 
     // std::cout << solveBoard(board, 2,4);
     // printBoard(board);
 }
