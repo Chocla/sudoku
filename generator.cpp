@@ -1,6 +1,11 @@
 #include <iostream>
+#include <algorithm>
+#include <vector>
 #include <ctime> 
 #include <cstdlib>
+#include <fstream>
+#include <string>
+#include <sstream>
 //implement for 9x9, then 16x16
 
 const int N = 9;
@@ -38,6 +43,10 @@ bool isValid(int candidate,int cell, int board[N][N]) {
         }
     }
     return true;
+}
+
+bool isUnique(int board[N][N]) {
+
 }
 bool solveBoard(int board[N][N], int excludeCell = N*N, int exlcludeVal = -1) {
     bool flags[N*N]; //keep track of initial board values
@@ -94,31 +103,91 @@ bool solveBoard(int board[N][N], int excludeCell = N*N, int exlcludeVal = -1) {
 
 //TODO: fix non unique solutions problem
 void removeCells(int board[N][N],int numCells) {
+    int puzzleBoard[N][N];
+    std::copy(&board[0][0],&board[0][0]+(N*N), &puzzleBoard[0][0]);
+    std::vector<int> changedCells(numCells);
+    std::vector<int> changedVals(numCells);
+
     int count = 0;
     while(count < numCells) {
         if(count % 5 == 0) {
             std::cout << "Removed " << count << " Cells" << std::endl;
         }
-        //pick a random cell to remove
-        int candidateCell = std::rand() % (N*N);
-        int row = candidateCell / N;
-        int col = candidateCell % N;
+        int candidatecell = std::rand() % (N*N);
+        int row = candidatecell / N;
+        int col = candidatecell % N;
         int tmp = board[row][col];
-        // std::cout << "Cell: " << candidateCell << std::endl;
         if(tmp == 0) {
-            continue;
+            continue; //repeated cell
         }
         board[row][col] = 0;
-        //if board can be solved using a value other than the removed one, solution is no longer unique
-        if( !solveBoard(board, candidateCell,tmp)) {
+        if (!solveBoard(board,candidatecell,tmp)) {
             count++;
+            changedCells[count] = candidatecell;
+            changedVals[count] = tmp;
         } else {
             board[row][col] = tmp;
         }
+        for(int i : changedCells) {
+                board[i / N][i % N] = 0;
+        }
     }
 }
-void formatBoard() {
-    //TODO: Somehow put the board into a .tex file
+
+// "\setrow{ROWNUM}{ {1}, {2},.....{9}}"
+std::vector<std::string> formatBoard(int board[N][N]) {
+    std::vector<std::string> rowStrings(N);
+
+    for(int i = 0; i < N; i++) {
+        std::string line = "\\setrow";
+        line += "{" + std::to_string(N - i) + "}{";
+        for(int j = 0; j < N; j++) {
+            if(board[i][j] == 0) {
+                line += "{},";
+            } else {
+                line += "{" + std::to_string(board[i][j]) + "},";
+            }
+        }
+        line.pop_back();
+        line += "}";
+        // std::cout << line << std::endl;
+        rowStrings[i] = line;
+    }
+
+    return rowStrings;
+}
+void createTexFile() {
+    std::ifstream infile("6_sudoku_template.tex");
+    std::string line;
+    std::ofstream outfile("new.tex");
+    while(std::getline(infile,line)) {
+        outfile << line << std::endl;
+        if (line.compare("    \\begin{lpsudoku}") == 0) {
+            //GENERATE PUZZLE
+            int board[N][N] = {
+                {5,3,0, 0,7,0, 0,0,0},
+                {6,0,0, 1,9,5, 0,0,0},
+                {0,9,8, 0,0,0, 0,6,0},
+                
+                {8,0,0, 0,6,0, 0,0,3},
+                {4,0,0, 8,0,3, 0,0,1},
+                {7,0,0, 0,2,0, 0,0,6},
+
+                {0,6,0, 0,0,0, 2,8,0},
+                {0,0,0, 4,1,9, 0,0,5},
+                {0,0,0, 0,8,0, 0,7,9}
+            };
+            
+            //FORMAT THE STRING
+            std::vector<std::string> rows = formatBoard(board);
+            for(std::string i : rows) {
+                outfile << i << std::endl;
+            }
+            //INSERT
+            // std::cout << line << std::endl;
+        }
+    }
+    return;
 }
 
 int countZeros(int board[N][N]) {
@@ -166,12 +235,12 @@ int main() {
         {3,4,5, 2,8,6, 1,7,9}
     };
 
-    solveBoard(blank);
-    printBoard(blank);
-    removeCells(blank,60);
-    printBoard(blank);
-    int count = countZeros(blank);
-    std::cout << "Actual Zeros: " << count << std::endl; 
-    // std::cout << solveBoard(board, 2,4);
-    // printBoard(board);
+    // solveBoard(blank);
+    // printBoard(blank);
+    // removeCells(blank,40);
+    // printBoard(blank);
+    // int count = countZeros(blank);
+    // std::cout << "Actual Zeros: " << count << std::endl; 
+
+    createTexFile();
 }
