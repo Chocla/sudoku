@@ -48,17 +48,22 @@ bool isValid(int candidate,int cell, std::vector<std::vector<int>> board) {
 bool isUnique(int board[N][N]) {
 
 }
-bool solveBoard(std::vector<std::vector<int>> board) {
+//TODO: Rewrite to use a pointer to the board, so that we don't have to pass it back and forth, 
+//and can instead pass a bool indicating that it was solved
+void solveBoard(std::vector<std::vector<int>> &board) {
     printBoard(board);
     std::vector<bool> flags(N*N);
-    std::vector<std::vector<int>> boardCopy = board;
+
+    std::vector<int> cellVals; //for shuffling
+    for (int i = 1; i <= N; i++) cellVals.push_back(i);
+    std::random_shuffle(cellVals.begin(),cellVals.end());
+    // std::cout << cellVals[0] << cellVals[4];
     for(int i = 0; i < N*N; i++) {
         if(board[i / N][i % N] != 0) {
             flags[i] = true;
         } 
     }
     int currentCell = 0;
-    int maxCell = 0;
     while(currentCell < N*N) {
         if(flags[currentCell]) {
             currentCell++;
@@ -67,29 +72,52 @@ bool solveBoard(std::vector<std::vector<int>> board) {
         int row = currentCell / N;
         int col = currentCell % N;
         bool backtrack = true;
-        for(int i = boardCopy[row][col] + 1; i <= N; i++) {
-            // int candidate = std::rand() % N + 1;
-            if(isValid(i, currentCell,boardCopy)) {
-                boardCopy[row][col] = i;
+
+        int index;
+        if(board[row][col] == 0 ){
+            index = -1;
+        } else {
+            auto q = std::find(cellVals.begin(),cellVals.end(),board[row][col]) ;
+            index = q - cellVals.begin();
+        }
+        for(int i = index + 1; i < N; i++) {
+            int candidate = cellVals[i];
+            if(isValid(candidate,currentCell,board)) {
+                board[row][col] = candidate;
                 backtrack = false;
                 break;
             }
         }
+
         if(backtrack) {
-            boardCopy[row][col] = 0;
+            board[row][col] = 0;
             currentCell--;
             while(flags[currentCell]) {
                 currentCell--;
             }
             if (currentCell < 0) {
-                return false;
+                //return board; //failure, TODO: figure out how to indicate this
             }
             continue;
         }
         currentCell++;
     }
-    printBoard(boardCopy);
-    return true;
+    // printBoard(board);
+}
+std::vector<std::vector<int>> fillBoard() {
+    std::vector<std::vector<int>> blank(N,std::vector<int>(N));
+    //seed board with numbers 1-9 twice in random positions
+    for(int i = 0; i < 18; i++) {
+        int val = (i % N) + 1;
+        int cell = std::rand() %(N*N);
+        while(!isValid(val,cell,blank)) {
+            cell = std::rand() % (N*N);
+        }
+        
+        blank[cell / N][cell % N] = val;
+    }
+    solveBoard(blank);
+    printBoard(blank);
 }
 //TODO: fix non unique solutions problem
 // void removeCells(int board[N][N],int numCells) {
@@ -208,7 +236,8 @@ int main() {
         {2,8,7, 4,1,9, 6,3,5},
         {3,4,5, 2,8,6, 1,7,9}
     };
-    solveBoard(board);
+    // solveBoard(board);
+    fillBoard();
     // std::vector<std::string> rows = formatBoard(board);
 
     // printBoard(board);
